@@ -1,3 +1,5 @@
+package org.example;
+
 public class TrainingsDaten {
 
 	private String wort;
@@ -9,11 +11,11 @@ public class TrainingsDaten {
 	}
 
 	public String getUrl() {
-		return null;
+		return url;
 	}
 
 	public String getWort() {
-		return null;
+		return wort;
 	}
 
 	public boolean checkValid() {
