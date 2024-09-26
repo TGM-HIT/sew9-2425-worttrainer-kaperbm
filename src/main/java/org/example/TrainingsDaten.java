@@ -19,7 +19,13 @@ public class TrainingsDaten {
 	}
 
 	public boolean checkValid() {
-		return false;
+		if(this.url== null) {
+			return false;
+		}
+		if (!(this.url.startsWith("http://") || this.url.startsWith("https://"))) {
+			return false;
+		}
+		return true;
 	}
 
 }
