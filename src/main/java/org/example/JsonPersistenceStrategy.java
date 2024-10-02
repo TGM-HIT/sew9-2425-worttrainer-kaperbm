@@ -3,79 +3,61 @@ package org.example;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileWriter;
+import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
-public class JsonPersistenceStrategy implements PersistenceStrategy {
+public class JsonPersistenceStrategy {
 
-    @Override
-    public void save(Rechtschreibtrainer trainer, String fileName) throws IOException {
+    public void save(Rechtschreibtrainer trainer, String filePath) throws IOException {
         JSONObject jsonObject = new JSONObject();
-
-        // Trainerstatistik speichern
         jsonObject.put("gesamteVersuche", trainer.getGesamteVersuche());
         jsonObject.put("richtig", trainer.getRichtig());
         jsonObject.put("falsch", trainer.getFalsch());
 
-        // Trainingsdaten speichern
-        JSONArray trainingDataArray = new JSONArray();
+        // Umwandlung von TrainingsDatenListe in JSON
+        JSONArray jsonArray = new JSONArray();
         for (TrainingsDaten daten : trainer.getTrainingsDatenListe()) {
-            JSONObject dataObject = new JSONObject();
-            dataObject.put("wort", daten.getWort());
-            dataObject.put("url", daten.getUrl());
-            trainingDataArray.put(dataObject);
+            JSONObject datenObject = new JSONObject();
+            datenObject.put("wort", daten.getWort());
+            datenObject.put("url", daten.getUrl().toString());
+            jsonArray.put(datenObject);
         }
-        jsonObject.put("trainingsDatenListe", trainingDataArray);
+        jsonObject.put("trainingsDatenListe", jsonArray);
 
-        // Aktuelles Paar speichern
-        if (trainer.getAktuellesPaar() != null) {
-            JSONObject currentPair = new JSONObject();
-            currentPair.put("wort", trainer.getAktuellesPaar().getWort());
-            currentPair.put("url", trainer.getAktuellesPaar().getUrl());
-            jsonObject.put("aktuellesPaar", currentPair);
-        }
-
-        try (FileWriter file = new FileWriter(fileName)) {
-            file.write(jsonObject.toString(4)); // Schreibt JSON-Daten mit Einrückung
+        // Speichern der JSON-Daten in eine Datei
+        try (FileWriter file = new FileWriter(filePath)) {
+            file.write(jsonObject.toString(4)); // Formatierung der Ausgabe mit Einrückung
         }
     }
 
-    @Override
-    public Rechtschreibtrainer load(String fileName) throws IOException {
+    public Rechtschreibtrainer load(String filePath) throws IOException {
+        StringBuilder jsonString = new StringBuilder();
+
+        // Einlesen der JSON-Datei
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                jsonString.append(line);
+            }
+        }
+
+        // Erstellen des Trainer-Objekts
         Rechtschreibtrainer trainer = new Rechtschreibtrainer();
-        ArrayList<TrainingsDaten> trainingDataList = new ArrayList<>();
+        JSONObject jsonObject = new JSONObject(jsonString.toString());
 
-        try (FileReader reader = new FileReader(fileName)) {
-            StringBuilder sb = new StringBuilder();
-            int i;
-            while ((i = reader.read()) != -1) {
-                sb.append((char) i);
-            }
+        trainer.setGesamteVersuche(jsonObject.getInt("gesamteVersuche"));
+        trainer.setRichtig(jsonObject.getInt("richtig"));
+        trainer.setFalsch(jsonObject.getInt("falsch"));
 
-            JSONObject jsonObject = new JSONObject(sb.toString());
-
-            // Trainerstatistik laden
-            trainer.setGesamteVersuche(jsonObject.getInt("gesamteVersuche"));
-            trainer.setRichtig(jsonObject.getInt("richtig"));
-            trainer.setFalsch(jsonObject.getInt("falsch"));
-
-            // Trainingsdaten laden
-            JSONArray trainingDataArray = jsonObject.getJSONArray("trainingsDatenListe");
-            for (int j = 0; j < trainingDataArray.length(); j++) {
-                JSONObject dataObject = trainingDataArray.getJSONObject(j);
-                TrainingsDaten daten = new TrainingsDaten(dataObject.getString("wort"), dataObject.getString("url"));
-                trainingDataList.add(daten);
-            }
-            trainer.setTrainingsDatenListe(trainingDataList);
-
-            // Aktuelles Paar laden (falls vorhanden)
-            if (jsonObject.has("aktuellesPaar")) {
-                JSONObject currentPair = jsonObject.getJSONObject("aktuellesPaar");
-                TrainingsDaten aktuellesPaar = new TrainingsDaten(currentPair.getString("wort"), currentPair.getString("url"));
-                trainer.selectPaar(trainingDataList.indexOf(aktuellesPaar));
-            }
+        // Laden der TrainingsDatenListe
+        JSONArray jsonArray = jsonObject.getJSONArray("trainingsDatenListe");
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject datenObject = jsonArray.getJSONObject(i);
+            String wort = datenObject.getString("wort");
+            String url = datenObject.getString("url");
+            trainer.addWortBildPaar(wort, url);
         }
 
         return trainer;

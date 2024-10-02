@@ -1,43 +1,32 @@
 package org.example;
 
-import java.io.IOException;
+import javax.swing.*;
+import java.awt.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 public class Rechtschreibtrainer {
-
 	private int gesamteVersuche;
-
 	private int richtig;
-
 	private int falsch;
-
 	private ArrayList<TrainingsDaten> trainingsDatenListe;
-
 	private TrainingsDaten aktuellesPaar;
 
-	private PersistenceStrategy persistenceStrategy;
-
-	public Rechtschreibtrainer(){
+	public Rechtschreibtrainer() {
 		gesamteVersuche = 0;
 		richtig = 0;
 		falsch = 0;
-		trainingsDatenListe = new ArrayList<TrainingsDaten>();
+		trainingsDatenListe = new ArrayList<>();
 	}
 
-	public Rechtschreibtrainer(ArrayList<TrainingsDaten> trainingsDatenListe){
+	public Rechtschreibtrainer(ArrayList<TrainingsDaten> trainingsDatenListe) {
 		gesamteVersuche = 0;
 		richtig = 0;
 		falsch = 0;
-		trainingsDatenListe = trainingsDatenListe;
+		this.trainingsDatenListe = trainingsDatenListe;
 	}
 
-
-
-	/**
-	 * Diese Methode wählt einen Trainigsdatenset durch einen Index
-	 * @param index ist der index zum neu ausgewählendem Trainsingsdatenset
-	 */
 	public void selectPaar(int index) {
 		if (index >= 0 && index < trainingsDatenListe.size()) {
 			aktuellesPaar = trainingsDatenListe.get(index);
@@ -46,23 +35,15 @@ public class Rechtschreibtrainer {
 		}
 	}
 
-
-	/**
-	 * Wählt einen zufälligen Trainingsdatenset
-	 */
 	public void selectRandomPaar() {
 		if (!trainingsDatenListe.isEmpty()) {
 			aktuellesPaar = trainingsDatenListe.get((int) (Math.random() * (trainingsDatenListe.size())));
 		}
 	}
 
-	/**
-	 * Fügt neue Trainingsdaten zum Array hinzu
-	 * @param wort beschreibung des Bildes
-	 * @param url url des Bildes
-	 */
-	public void addWortBildPaar(String wort, String url) {
-		TrainingsDaten neuesPaar = new TrainingsDaten(wort, url);
+	public void addWortBildPaar(String wort, String url) throws MalformedURLException {
+		URL imageUrl = new URL(url);
+		TrainingsDaten neuesPaar = new TrainingsDaten(wort, imageUrl);
 		if (neuesPaar.checkValid()) {
 			trainingsDatenListe.add(neuesPaar);
 		} else {
@@ -70,29 +51,11 @@ public class Rechtschreibtrainer {
 		}
 	}
 
-	/**
-	 *  * Fügt neue Trainingsdaten zum Array hinzu
-	 * @param neuesPaar Das neue Paar
-	 */
- 	public void addWortBildPaar(TrainingsDaten neuesPaar){
-		if (neuesPaar.checkValid()) {
-			trainingsDatenListe.add(neuesPaar);
-		} else {
-			System.out.println("Ungültige URL, das Paar wurde nicht hinzugefügt.");
-		}
-	}
-
-	/**
-	 * Gibt die Statistik zurück
-	 * Dabei wird die gesamtAnzahl, wie viele Richtig waren, und wie viele Falsch waren zurückgegeben
-	 * @return gibt die Statistik in Form eines Textes zurück
-	 */
 	public String getStatistic() {
-		String text = "Von " + gesamteVersuche + " sind " + richtig + " Richtig und " + falsch + " Falsch";
-		return text;
+		return "Von " + gesamteVersuche + " sind " + richtig + " Richtig und " + falsch + " Falsch.";
 	}
 
-	public void updateStatistic(boolean isCorrect) {
+	public void recordAttempt(boolean isCorrect) {
 		gesamteVersuche++;
 		if (isCorrect) {
 			richtig++;
@@ -101,8 +64,12 @@ public class Rechtschreibtrainer {
 		}
 	}
 
-	public TrainingsDaten getAktuellesPaar() {
-		return aktuellesPaar;
+	public int getGesamteVersuche() {
+		return gesamteVersuche;
+	}
+
+	public void setGesamteVersuche(int gesamteVersuche) {
+		this.gesamteVersuche = gesamteVersuche;
 	}
 
 	public ArrayList<TrainingsDaten> getTrainingsDatenListe() {
@@ -113,33 +80,62 @@ public class Rechtschreibtrainer {
 		this.trainingsDatenListe = trainingsDatenListe;
 	}
 
-	public void setPersistenceStrategy(PersistenceStrategy strategy) {
-		this.persistenceStrategy = strategy;
-	}
+	public JPanel createImageInputPanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
 
-	public void saveSession(String fileName) throws IOException {
-		if (persistenceStrategy != null) {
-			persistenceStrategy.save(this, fileName);
+		if (aktuellesPaar != null) {
+			try {
+				URL imageUrl = aktuellesPaar.getUrl();
+				ImageIcon imageIcon = new ImageIcon(imageUrl);
+
+				// Bild skalieren
+				Image image = imageIcon.getImage();
+				Image scaledImage = image.getScaledInstance(400, 400, Image.SCALE_SMOOTH);
+				ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+				JLabel imageLabel = new JLabel(scaledIcon);
+				panel.add(imageLabel, BorderLayout.CENTER);
+			} catch (Exception e) {
+				System.out.println("Fehler beim Laden des Bildes: " + e.getMessage());
+			}
+		} else {
+			System.out.println("Kein Bild ausgewählt.");
+			JLabel messageLabel = new JLabel("Kein Bild verfügbar");
+			panel.add(messageLabel, BorderLayout.CENTER);
 		}
+
+		JTextField textField = new JTextField(20);
+		panel.add(textField, BorderLayout.SOUTH);
+		return panel;
 	}
 
-	public void loadSession(String fileName) throws IOException {
-		if (persistenceStrategy != null) {
-			Rechtschreibtrainer trainer = persistenceStrategy.load(fileName);
-			this.gesamteVersuche = trainer.gesamteVersuche;
-			this.richtig = trainer.richtig;
-			this.falsch = trainer.falsch;
-			this.trainingsDatenListe = trainer.trainingsDatenListe;
-			this.aktuellesPaar = trainer.aktuellesPaar;
+	public TrainingsDaten getAktuellesPaar() {
+		return aktuellesPaar;
+	}
+
+	public int getRichtig() {
+		return richtig;
+	}
+
+	public void setRichtig(int richtig) {
+		this.richtig = richtig;
+	}
+
+	public int getFalsch() {
+		return falsch;
+	}
+
+	public void setFalsch(int falsch) {
+		this.falsch = falsch;
+	}
+
+	public boolean pruefeAntwort(String eingabe) {
+		gesamteVersuche++;
+		boolean isRichtig = aktuellesPaar.getWort().equalsIgnoreCase(eingabe);
+		if (isRichtig) {
+			richtig++;
 		}
+		return isRichtig;
 	}
-
-	public int getGesamteVersuche() { return gesamteVersuche; }
-	public void setGesamteVersuche(int gesamteVersuche) { this.gesamteVersuche = gesamteVersuche; }
-	public int getRichtig() { return richtig; }
-	public void setRichtig(int richtig) { this.richtig = richtig; }
-	public int getFalsch() { return falsch; }
-	public void setFalsch(int falsch) { this.falsch = falsch; }
-	public void setAktuellesPaar(TrainingsDaten aktuellesPaar) { this.aktuellesPaar = aktuellesPaar; }
-
 }

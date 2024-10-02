@@ -1,31 +1,26 @@
 package org.example;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class TrainingsDaten {
-
 	private String wort;
+	private URL url;
 
-	private String url;
-
-	public TrainingsDaten(String wort, String url) {
-
-	}
-
-	public String getUrl() {
-		return url;
+	public TrainingsDaten(String wort, URL url) {
+		this.wort = wort;
+		this.url = url;
 	}
 
 	public String getWort() {
 		return wort;
 	}
 
-	public boolean checkValid() {
-		if(this.url== null) {
-			return false;
-		}
-		if (!(this.url.startsWith("http://") || this.url.startsWith("https://"))) {
-			return false;
-		}
-		return true;
+	public URL getUrl() {
+		return url;
 	}
 
+	public boolean checkValid() {
+		return url != null && (url.toString().startsWith("http://") || url.toString().startsWith("https://"));
+	}
 }
