@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         Rechtschreibtrainer trainer = new Rechtschreibtrainer();
         JsonPersistenceStrategy persistence = new JsonPersistenceStrategy();
-        String filePath = "/home/kacper/IdeaProjects/sew9-2425-worttrainer-kaperbm/src/main/java/org/example/worttrainer.json";
+        String filePath = "trainerData.json";
 
         // Überprüfen, ob die Datei existiert, um Daten zu laden
         File file = new File(filePath);
@@ -28,42 +28,84 @@ public class Main {
             trainer.addWortBildPaar("Sliggoo", "https://img.pokemondb.net/artwork/large/sliggoo.jpg");
         }
 
-        // GUI-Loop für den Rechtschreibtrainer
-        while (true) {
-            trainer.waehleZufall();
-            TrainingsDaten aktuellesPaar = trainer.getAktuellesPaar();
-            ImageIcon imageIcon = new ImageIcon(aktuellesPaar.getUrl());
+        // Erstellen des Hauptfensters
+        JFrame frame = new JFrame("Rechtschreibtrainer");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-            // Eingabeaufforderung mit Bild
-            JPanel panel = new JPanel();
-            JLabel label = new JLabel(imageIcon);
-            JTextField textField = new JTextField(10); // Eingabefeld für das Wort
-            panel.add(label);
-            panel.add(textField);
+        // Panel für die Anzeige des Bildes und der Eingabeaufforderung
+        JPanel panel = new JPanel();
+        frame.add(panel, BorderLayout.CENTER);
 
-            int result = JOptionPane.showConfirmDialog(null, panel, "Wie heißt das Bild?", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        // Statistik-Panel erstellen und hinzufügen
+        JPanel statistikPanel = new JPanel();
+        statistikPanel.setLayout(new BoxLayout(statistikPanel, BoxLayout.Y_AXIS));
+        JLabel gesamtVersucheLabel = new JLabel("Gesamte Versuche: " + trainer.getGesamteVersuche());
+        JLabel richtigeVersucheLabel = new JLabel("Richtige Versuche: " + trainer.getRichtigeVersuche());
+        JLabel falscheVersucheLabel = new JLabel("Falsche Versuche: " + trainer.getFalscheVersuche());
+        statistikPanel.add(gesamtVersucheLabel);
+        statistikPanel.add(richtigeVersucheLabel);
+        statistikPanel.add(falscheVersucheLabel);
+        frame.add(statistikPanel, BorderLayout.EAST); // Statistik auf der rechten Seite anzeigen
 
-            if (result == JOptionPane.OK_OPTION) {
-                String eingabe = textField.getText().trim(); // Eingabe des Benutzers
+        // Eingabefeld und Bild anzeigen
+        JLabel imageLabel = new JLabel();
+        JTextField textField = new JTextField(10);
+        panel.add(imageLabel);
+        panel.add(textField);
 
-                if (eingabe.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Bitte gib ein Wort ein."); // Warnung, wenn das Feld leer ist
-                    continue; // Schleife neu starten
-                }
+        // Wähle ein zufälliges Wort-Bild-Paar und zeige es an
+        trainer.waehleZufall();
+        updateImageAndFields(trainer, imageLabel, textField);
 
-                boolean isRichtig = trainer.pruefeAntwort(eingabe);
-                String nachricht = isRichtig ? "Richtig!" : "Falsch! Das richtige Wort ist: " + aktuellesPaar.getWort();
-                JOptionPane.showMessageDialog(null, nachricht);
-            } else {
-                break; // Schleife brechen, wenn Abbrechen gewählt wurde
+        // Schaltfläche für die Überprüfung der Eingabe
+        JButton pruefenButton = new JButton("Überprüfen");
+        panel.add(pruefenButton);
+
+        Rechtschreibtrainer finalTrainer = trainer;
+        pruefenButton.addActionListener(e -> {
+            String eingabe = textField.getText().trim(); // Eingabe des Benutzers
+
+            if (eingabe.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Bitte gib ein Wort ein."); // Warnung, wenn das Feld leer ist
+                return;
             }
-        }
+
+            // Überprüfen der Antwort und Aktualisieren der Statistik
+            boolean isRichtig = finalTrainer.pruefeAntwort(eingabe);
+            String nachricht = isRichtig ? "Richtig!" : "Falsch! Das richtige Wort ist: " + finalTrainer.getAktuellesPaar().getWort();
+            JOptionPane.showMessageDialog(frame, nachricht);
+
+            // Statistiklabels aktualisieren
+            gesamtVersucheLabel.setText("Gesamte Versuche: " + finalTrainer.getGesamteVersuche());
+            richtigeVersucheLabel.setText("Richtige Versuche: " + finalTrainer.getRichtigeVersuche());
+            falscheVersucheLabel.setText("Falsche Versuche: " + finalTrainer.getFalscheVersuche());
+
+            // Neues zufälliges Bild auswählen und anzeigen
+            finalTrainer.waehleZufall();
+            updateImageAndFields(finalTrainer, imageLabel, textField);
+        });
+
+        // Fenstergröße anpassen und anzeigen
+        frame.pack();
+        frame.setVisible(true);
 
         // Persistieren der Daten beim Programmende
-        try {
-            persistence.save(trainer, filePath);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Rechtschreibtrainer finalTrainer1 = trainer;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                persistence.save(finalTrainer1, filePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }));
+    }
+
+    // Methode zum Aktualisieren des Bildes und Leeren des Eingabefelds
+    private static void updateImageAndFields(Rechtschreibtrainer trainer, JLabel imageLabel, JTextField textField) {
+        TrainingsDaten aktuellesPaar = trainer.getAktuellesPaar();
+        ImageIcon imageIcon = new ImageIcon(aktuellesPaar.getUrl());
+        imageLabel.setIcon(imageIcon);
+        textField.setText("");
     }
 }

@@ -7,9 +7,6 @@ public class TrainingsDaten {
 	private URL url;
 
 	public TrainingsDaten(String wort, URL url) {
-		if (wort == null || url == null) {
-			throw new IllegalArgumentException("Wort und URL dürfen nicht null sein");
-		}
 		this.wort = wort;
 		this.url = url;
 	}
@@ -20,5 +17,13 @@ public class TrainingsDaten {
 
 	public URL getUrl() {
 		return url;
+	}
+
+	public void setWort(String wort) {
+		this.wort = wort;
+	}
+
+	public void setUrl(URL url) {
+		this.url = url;
 	}
 }

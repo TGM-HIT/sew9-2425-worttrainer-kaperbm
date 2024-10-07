@@ -6,38 +6,49 @@ import java.util.List;
 import java.util.Random;
 
 public class Rechtschreibtrainer {
-	private List<TrainingsDaten> wortBildPaare = new ArrayList<>();
+	private List<TrainingsDaten> trainingsDatenListe;
 	private TrainingsDaten aktuellesPaar;
-	private int gesamteVersuche = 0;
-	private int richtigeVersuche = 0;
-	private int falscheVersuche = 0; // Neues Feld für falsche Versuche
+	private int richtigeVersuche;
+	private int falscheVersuche;
+	private int gesamteVersuche;
 
-	// Fügt ein neues Wort-Bild-Paar hinzu
-	public void addWortBildPaar(String wort, String urlString) {
+	public Rechtschreibtrainer() {
+		this.trainingsDatenListe = new ArrayList<>();
+		this.richtigeVersuche = 0;
+		this.falscheVersuche = 0;
+		this.gesamteVersuche = 0;
+	}
+
+	// Hinzufügen eines neuen Wort-Bild-Paares
+	public void addWortBildPaar(String wort, String bildUrl) {
 		try {
-			URL url = new URL(urlString);
-			wortBildPaare.add(new TrainingsDaten(wort, url));
+			URL url = new URL(bildUrl);
+			TrainingsDaten paar = new TrainingsDaten(wort, url);
+			this.trainingsDatenListe.add(paar);
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Ungültige URL: " + bildUrl);
 		}
 	}
 
-	// Wählt ein zufälliges Wort-Bild-Paar aus
+	// Wählen eines zufälligen Wort-Bild-Paares
 	public void waehleZufall() {
+		if (this.trainingsDatenListe.isEmpty()) return;
 		Random random = new Random();
-		aktuellesPaar = wortBildPaare.get(random.nextInt(wortBildPaare.size()));
+		int index = random.nextInt(this.trainingsDatenListe.size());
+		this.aktuellesPaar = this.trainingsDatenListe.get(index);
 	}
 
-	// Überprüft die Eingabe des Nutzers
-	public boolean pruefeAntwort(String eingabe) {
+	// Überprüfen der Benutzerantwort
+	public boolean pruefeAntwort(String wort) {
+		if (aktuellesPaar == null) return false;
 		gesamteVersuche++;
-		boolean isRichtig = aktuellesPaar.getWort().equalsIgnoreCase(eingabe);
-		if (isRichtig) {
+		if (aktuellesPaar.getWort().equalsIgnoreCase(wort)) {
 			richtigeVersuche++;
+			return true;
 		} else {
 			falscheVersuche++;
+			return false;
 		}
-		return isRichtig;
 	}
 
 	// Getter und Setter
@@ -45,35 +56,35 @@ public class Rechtschreibtrainer {
 		return aktuellesPaar;
 	}
 
-	public int getGesamteVersuche() {
-		return gesamteVersuche;
-	}
-
-	public void setGesamteVersuche(int gesamteVersuche) {
-		this.gesamteVersuche = gesamteVersuche;
-	}
-
 	public int getRichtigeVersuche() {
 		return richtigeVersuche;
-	}
-
-	public void setRichtigeVersuche(int richtigeVersuche) {
-		this.richtigeVersuche = richtigeVersuche;
 	}
 
 	public int getFalscheVersuche() {
 		return falscheVersuche;
 	}
 
-	public void setFalscheVersuche(int falscheVersuche) {
-		this.falscheVersuche = falscheVersuche;
+	public int getGesamteVersuche() {
+		return gesamteVersuche;
 	}
 
 	public List<TrainingsDaten> getTrainingsDatenListe() {
-		return wortBildPaare;
+		return trainingsDatenListe;
 	}
 
-	public void setTrainingsDatenListe(List<TrainingsDaten> wortBildPaare) {
-		this.wortBildPaare = wortBildPaare;
+	public void setTrainingsDatenListe(List<TrainingsDaten> liste) {
+		this.trainingsDatenListe = liste;
+	}
+
+	public void setGesamteVersuche(int gesamteVersuche) {
+		this.gesamteVersuche = gesamteVersuche;
+	}
+
+	public void setRichtigeVersuche(int richtigeVersuche) {
+		this.richtigeVersuche = richtigeVersuche;
+	}
+
+	public void setFalscheVersuche(int falscheVersuche) {
+		this.falscheVersuche = falscheVersuche;
 	}
 }

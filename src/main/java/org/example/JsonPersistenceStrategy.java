@@ -3,59 +3,51 @@ package org.example;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.BufferedReader;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JsonPersistenceStrategy {
-
-    // Speichert die Daten in einer JSON-Datei
-    public void save(Rechtschreibtrainer trainer, String filePath) throws Exception {
+    public void save(Rechtschreibtrainer trainer, String filePath) throws IOException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("gesamteVersuche", trainer.getGesamteVersuche());
         jsonObject.put("richtig", trainer.getRichtigeVersuche());
         jsonObject.put("falsch", trainer.getFalscheVersuche());
 
-        JSONArray datenArray = new JSONArray();
+        JSONArray jsonArray = new JSONArray();
         for (TrainingsDaten daten : trainer.getTrainingsDatenListe()) {
-            JSONObject paar = new JSONObject();
-            paar.put("wort", daten.getWort());
-            paar.put("url", daten.getUrl().toString());
-            datenArray.put(paar);
+            JSONObject paarObject = new JSONObject();
+            paarObject.put("wort", daten.getWort());
+            paarObject.put("url", daten.getUrl().toString());
+            jsonArray.put(paarObject);
         }
-        jsonObject.put("trainingsDatenListe", datenArray);
+        jsonObject.put("trainingsDatenListe", jsonArray);
 
         try (FileWriter file = new FileWriter(filePath)) {
-            file.write(jsonObject.toString(4)); // 4 für die Einrückung
+            file.write(jsonObject.toString(4));
         }
     }
 
-    // Lädt die Daten aus einer JSON-Datei
     public Rechtschreibtrainer load(String filePath) throws Exception {
         Rechtschreibtrainer trainer = new Rechtschreibtrainer();
-        StringBuilder jsonBuilder = new StringBuilder();
+        File file = new File(filePath);
+        String content = new String(Files.readAllBytes(file.toPath()));
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                jsonBuilder.append(line);
-            }
-        }
-
-        JSONObject jsonObject = new JSONObject(jsonBuilder.toString());
+        JSONObject jsonObject = new JSONObject(content);
         trainer.setGesamteVersuche(jsonObject.getInt("gesamteVersuche"));
         trainer.setRichtigeVersuche(jsonObject.getInt("richtig"));
         trainer.setFalscheVersuche(jsonObject.getInt("falsch"));
 
-        JSONArray datenArray = jsonObject.getJSONArray("trainingsDatenListe");
+        JSONArray jsonArray = jsonObject.getJSONArray("trainingsDatenListe");
         List<TrainingsDaten> datenListe = new ArrayList<>();
-        for (int i = 0; i < datenArray.length(); i++) {
-            JSONObject paar = datenArray.getJSONObject(i);
-            String wort = paar.getString("wort");
-            URL url = new URL(paar.getString("url"));
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject paarObject = jsonArray.getJSONObject(i);
+            String wort = paarObject.getString("wort");
+            URL url = new URL(paarObject.getString("url"));
             datenListe.add(new TrainingsDaten(wort, url));
         }
         trainer.setTrainingsDatenListe(datenListe);
