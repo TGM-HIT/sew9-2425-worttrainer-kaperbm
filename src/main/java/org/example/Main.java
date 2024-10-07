@@ -3,10 +3,9 @@ package org.example;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.net.MalformedURLException;
 
 public class Main {
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) {
         Rechtschreibtrainer trainer = new Rechtschreibtrainer();
         JsonPersistenceStrategy persistence = new JsonPersistenceStrategy();
         String filePath = "/home/kacper/IdeaProjects/sew9-2425-worttrainer-kaperbm/src/main/java/org/example/worttrainer.json";
@@ -21,14 +20,17 @@ public class Main {
             }
         } else {
             // Initiale Wort-Bild-Paare hinzufügen, wenn keine Datei existiert
-            // trainer.addWortBildPaar("Spike", "https://res.ldrescdn.com/faq/images/en/e9d37afc-54cf-46bf-85b3-a20174af6eed.jpg");
-            // trainer.addWortBildPaar("Spike", "https://res.ldrescdn.com/faq/images/en/e9d37afc-54cf-46bf-85b3-a20174af6eed.jpg");
-            // trainer.addWortBildPaar("Spike", "https://res.ldrescdn.com/faq/images/en/e9d37afc-54cf-46bf-85b3-a20174af6eed.jpg");
+            trainer.addWortBildPaar("charmander", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//004.png");
+            trainer.addWortBildPaar("Bulbasaur", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//001.png");
+            trainer.addWortBildPaar("Lucario", "https://img.pokemondb.net/artwork/large/lucario.jpg");
+            trainer.addWortBildPaar("Elgyem", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//605.png");
+            trainer.addWortBildPaar("Dragonite", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//149.png");
+            trainer.addWortBildPaar("Sliggoo", "https://img.pokemondb.net/artwork/large/sliggoo.jpg");
         }
 
         // GUI-Loop für den Rechtschreibtrainer
         while (true) {
-            trainer.selectRandomPaar();
+            trainer.waehleZufall();
             TrainingsDaten aktuellesPaar = trainer.getAktuellesPaar();
             ImageIcon imageIcon = new ImageIcon(aktuellesPaar.getUrl());
 

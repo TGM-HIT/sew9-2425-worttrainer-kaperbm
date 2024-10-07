@@ -1,67 +1,48 @@
 package org.example;
 
-import javax.swing.*;
-import java.awt.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Rechtschreibtrainer {
-	private int gesamteVersuche;
-	private int richtig;
-	private int falsch;
-	private ArrayList<TrainingsDaten> trainingsDatenListe;
+	private List<TrainingsDaten> wortBildPaare = new ArrayList<>();
 	private TrainingsDaten aktuellesPaar;
+	private int gesamteVersuche = 0;
+	private int richtigeVersuche = 0;
+	private int falscheVersuche = 0; // Neues Feld für falsche Versuche
 
-	public Rechtschreibtrainer() {
-		gesamteVersuche = 0;
-		richtig = 0;
-		falsch = 0;
-		trainingsDatenListe = new ArrayList<>();
-	}
-
-	public Rechtschreibtrainer(ArrayList<TrainingsDaten> trainingsDatenListe) {
-		gesamteVersuche = 0;
-		richtig = 0;
-		falsch = 0;
-		this.trainingsDatenListe = trainingsDatenListe;
-	}
-
-	public void selectPaar(int index) {
-		if (index >= 0 && index < trainingsDatenListe.size()) {
-			aktuellesPaar = trainingsDatenListe.get(index);
-		} else {
-			System.out.println("Index außerhalb der Grenzen!");
+	// Fügt ein neues Wort-Bild-Paar hinzu
+	public void addWortBildPaar(String wort, String urlString) {
+		try {
+			URL url = new URL(urlString);
+			wortBildPaare.add(new TrainingsDaten(wort, url));
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	public void selectRandomPaar() {
-		if (!trainingsDatenListe.isEmpty()) {
-			aktuellesPaar = trainingsDatenListe.get((int) (Math.random() * (trainingsDatenListe.size())));
-		}
+	// Wählt ein zufälliges Wort-Bild-Paar aus
+	public void waehleZufall() {
+		Random random = new Random();
+		aktuellesPaar = wortBildPaare.get(random.nextInt(wortBildPaare.size()));
 	}
 
-	public void addWortBildPaar(String wort, String url) throws MalformedURLException {
-		URL imageUrl = new URL(url);
-		TrainingsDaten neuesPaar = new TrainingsDaten(wort, imageUrl);
-		if (neuesPaar.checkValid()) {
-			trainingsDatenListe.add(neuesPaar);
-		} else {
-			System.out.println("Ungültige URL, das Paar wurde nicht hinzugefügt.");
-		}
-	}
-
-	public String getStatistic() {
-		return "Von " + gesamteVersuche + " sind " + richtig + " Richtig und " + falsch + " Falsch.";
-	}
-
-	public void recordAttempt(boolean isCorrect) {
+	// Überprüft die Eingabe des Nutzers
+	public boolean pruefeAntwort(String eingabe) {
 		gesamteVersuche++;
-		if (isCorrect) {
-			richtig++;
+		boolean isRichtig = aktuellesPaar.getWort().equalsIgnoreCase(eingabe);
+		if (isRichtig) {
+			richtigeVersuche++;
 		} else {
-			falsch++;
+			falscheVersuche++;
 		}
+		return isRichtig;
+	}
+
+	// Getter und Setter
+	public TrainingsDaten getAktuellesPaar() {
+		return aktuellesPaar;
 	}
 
 	public int getGesamteVersuche() {
@@ -72,70 +53,27 @@ public class Rechtschreibtrainer {
 		this.gesamteVersuche = gesamteVersuche;
 	}
 
-	public ArrayList<TrainingsDaten> getTrainingsDatenListe() {
-		return trainingsDatenListe;
+	public int getRichtigeVersuche() {
+		return richtigeVersuche;
 	}
 
-	public void setTrainingsDatenListe(ArrayList<TrainingsDaten> trainingsDatenListe) {
-		this.trainingsDatenListe = trainingsDatenListe;
+	public void setRichtigeVersuche(int richtigeVersuche) {
+		this.richtigeVersuche = richtigeVersuche;
 	}
 
-	public JPanel createImageInputPanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-
-		if (aktuellesPaar != null) {
-			try {
-				URL imageUrl = aktuellesPaar.getUrl();
-				ImageIcon imageIcon = new ImageIcon(imageUrl);
-
-				// Bild skalieren
-				Image image = imageIcon.getImage();
-				Image scaledImage = image.getScaledInstance(400, 400, Image.SCALE_SMOOTH);
-				ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-				JLabel imageLabel = new JLabel(scaledIcon);
-				panel.add(imageLabel, BorderLayout.CENTER);
-			} catch (Exception e) {
-				System.out.println("Fehler beim Laden des Bildes: " + e.getMessage());
-			}
-		} else {
-			System.out.println("Kein Bild ausgewählt.");
-			JLabel messageLabel = new JLabel("Kein Bild verfügbar");
-			panel.add(messageLabel, BorderLayout.CENTER);
-		}
-
-		JTextField textField = new JTextField(20);
-		panel.add(textField, BorderLayout.SOUTH);
-		return panel;
+	public int getFalscheVersuche() {
+		return falscheVersuche;
 	}
 
-	public TrainingsDaten getAktuellesPaar() {
-		return aktuellesPaar;
+	public void setFalscheVersuche(int falscheVersuche) {
+		this.falscheVersuche = falscheVersuche;
 	}
 
-	public int getRichtig() {
-		return richtig;
+	public List<TrainingsDaten> getTrainingsDatenListe() {
+		return wortBildPaare;
 	}
 
-	public void setRichtig(int richtig) {
-		this.richtig = richtig;
-	}
-
-	public int getFalsch() {
-		return falsch;
-	}
-
-	public void setFalsch(int falsch) {
-		this.falsch = falsch;
-	}
-
-	public boolean pruefeAntwort(String eingabe) {
-		gesamteVersuche++;
-		boolean isRichtig = aktuellesPaar.getWort().equalsIgnoreCase(eingabe);
-		if (isRichtig) {
-			richtig++;
-		}
-		return isRichtig;
+	public void setTrainingsDatenListe(List<TrainingsDaten> wortBildPaare) {
+		this.wortBildPaare = wortBildPaare;
 	}
 }

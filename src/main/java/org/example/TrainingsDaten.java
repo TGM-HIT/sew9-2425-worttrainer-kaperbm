@@ -1,6 +1,5 @@
 package org.example;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public class TrainingsDaten {
@@ -8,6 +7,9 @@ public class TrainingsDaten {
 	private URL url;
 
 	public TrainingsDaten(String wort, URL url) {
+		if (wort == null || url == null) {
+			throw new IllegalArgumentException("Wort und URL dürfen nicht null sein");
+		}
 		this.wort = wort;
 		this.url = url;
 	}
@@ -18,9 +20,5 @@ public class TrainingsDaten {
 
 	public URL getUrl() {
 		return url;
-	}
-
-	public boolean checkValid() {
-		return url != null && (url.toString().startsWith("http://") || url.toString().startsWith("https://"));
 	}
 }
