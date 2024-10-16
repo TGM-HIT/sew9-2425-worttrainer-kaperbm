@@ -22,10 +22,7 @@ public class Main {
             // Initiale Wort-Bild-Paare hinzufügen, wenn keine Datei existiert
             trainer.addWortBildPaar("charmander", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//004.png");
             trainer.addWortBildPaar("Bulbasaur", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//001.png");
-            trainer.addWortBildPaar("Lucario", "https://img.pokemondb.net/artwork/large/lucario.jpg");
-            trainer.addWortBildPaar("Elgyem", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//605.png");
-            trainer.addWortBildPaar("Dragonite", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//149.png");
-            trainer.addWortBildPaar("Sliggoo", "https://img.pokemondb.net/artwork/large/sliggoo.jpg");
+            trainer.addWortBildPaar("Squirtle", "https://assets.pokemon.com/assets/cms2/img/pokedex/full//007.png");
         }
 
         // Erstellen des Hauptfensters
