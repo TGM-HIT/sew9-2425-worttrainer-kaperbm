@@ -4,7 +4,7 @@
 **version** 18 Sep 2024
 
 ---
-Rechtschreibtrainer
+## Rechtschreibtrainer
 
 Ein Java-basiertes Rechtschreibtrainer-Programm, das Benutzern hilft, ihre Rechtschreibfähigkeiten zu verbessern, indem es sie auffordert, das richtige Wort zu einem angezeigten Bild einzugeben. Das Programm verwendet eine grafische Benutzeroberfläche (GUI) und speichert die Benutzerstatistiken in einer JSON-Datei.
 Inhaltsverzeichnis
@@ -18,7 +18,7 @@ Inhaltsverzeichnis
     Installation
     Lizenz
 
-Projektbeschreibung
+## Projektbeschreibung
 
 Der Rechtschreibtrainer zeigt zufällig ausgewählte Wort-Bild-Paare an, z. B. Pokémon-Namen und deren Bilder. Benutzer müssen das korrekte Wort eingeben, und das Programm überprüft die Eingabe und aktualisiert die Statistik über richtige und falsche Versuche. Bei jedem Programmstart werden die Statistiken aus einer JSON-Datei geladen und am Ende des Programms gespeichert.
 Funktionen
@@ -29,7 +29,7 @@ Funktionen
     Datenpersistenz: Die Benutzerdaten werden in einer JSON-Datei gespeichert, sodass sie bei zukünftigen Starts wiederhergestellt werden können.
     Grafische Benutzeroberfläche: Die Anwendung bietet eine intuitive GUI, die die Interaktion erleichtert.
 
-Code-Struktur
+## Code-Struktur
 
 Hier ist eine Übersicht der wichtigsten Klassen im Projekt:
 1. Main
